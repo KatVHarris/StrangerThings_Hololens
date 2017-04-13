@@ -32,6 +32,11 @@ public class LetterBehavior : MonoBehaviour {
             selectable = true;
             this.transform.GetComponent<BoxCollider>().enabled = true;
         }
+
+        if (Input.GetKeyUp(KeyCode.M))
+        {
+            OnSelect();
+        }
 	
 	}
 

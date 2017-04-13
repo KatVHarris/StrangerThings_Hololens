@@ -27,13 +27,4 @@ public class PhoneBehavior : MonoBehaviour
 
     }
 
-    //public void UnParent()
-    //{
-
-    //}
-
-    //public void ParentToPalyer()
-    //{
-    //    this.transform.parent = Player.transform;
-    //}
 }
