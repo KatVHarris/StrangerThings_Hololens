@@ -147,8 +147,7 @@ public class SteamVR_Controller
 			for (uint i = 0; i < devices.Length; i++)
 				devices[i] = new Device(i);
 		}
-        Debug.Log("index: " + deviceIndex);
-        Debug.Log("devices length: " + devices.Length);
+       
 		return devices[deviceIndex];
 	}
 

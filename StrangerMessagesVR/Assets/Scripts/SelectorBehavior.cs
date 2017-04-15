@@ -7,7 +7,6 @@ public class SelectorBehavior : MonoBehaviour {
     SteamVR_LaserPointer laserPointer;
     private int deviceIndex = -1;
     private SteamVR_Controller.Device controller;
-    SteamVR_TrackedObject trackedObj;
 
     bool pointerOnButton = false;
     GameObject myEventSystem;
@@ -16,6 +15,13 @@ public class SelectorBehavior : MonoBehaviour {
     string letterTag = "Letter";
     GameObject currentFocus;
 
+    // 1
+    private SteamVR_TrackedObject trackedObj;
+    // 2
+    private SteamVR_Controller.Device Controller
+    {
+        get { return SteamVR_Controller.Input((int)trackedObj.index); }
+    }
 
     void Awake()
     {
@@ -32,6 +38,8 @@ public class SelectorBehavior : MonoBehaviour {
         if (other.tag == "Selectable")
         {
             currentFocus = other.gameObject;
+            currentFocus.GetComponent<Light>().intensity = 1f; 
+            
         }
     }
 
@@ -46,7 +54,6 @@ public class SelectorBehavior : MonoBehaviour {
 
     private void Update()
     {
-        var device = SteamVR_Controller.Input((int)trackedObj.index);
         if (Input.GetKeyUp(KeyCode.M))
         {
             currentFocus.GetComponent<LetterBehaviorVR>().OnSelect();
@@ -54,12 +61,16 @@ public class SelectorBehavior : MonoBehaviour {
 
         if (pointerOnButton)
         {
-            if (device.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+            if (Controller.GetHairTriggerDown())
             {
-                //btn.onClick.Invoke();
-                Debug.Log("Clicked");
+                currentFocus.GetComponent<LetterBehaviorVR>().OnSelect();
             }
         }
+        if(currentFocus.tag == "Selectable" && Controller.GetHairTriggerDown())
+        {
+            currentFocus.GetComponent<PlayButton>().PlayMessage();
+        }
+
     }
 
 

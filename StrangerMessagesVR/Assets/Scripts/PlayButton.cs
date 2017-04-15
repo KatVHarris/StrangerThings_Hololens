@@ -24,4 +24,11 @@ public class PlayButton : MonoBehaviour {
         MessageManager.PlayMessage();
         playingMessage = true; 
     }
+
+    public void PlayMessage()
+    {
+        //Call Message Play
+        MessageManager.PlayMessage();
+        playingMessage = true;
+    }
 }

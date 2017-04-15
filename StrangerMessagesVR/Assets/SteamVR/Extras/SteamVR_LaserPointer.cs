@@ -102,7 +102,6 @@ public class SteamVR_LaserPointer : MonoBehaviour
         float dist = 100f;
 
         SteamVR_TrackedController controller = GetComponent<SteamVR_TrackedController>();
-        Debug.Log("controller null? - " + controller.name);
 
         Ray raycast = new Ray(transform.position, transform.forward);
         RaycastHit hit;
@@ -113,6 +112,8 @@ public class SteamVR_LaserPointer : MonoBehaviour
             PointerEventArgs args = new PointerEventArgs();
             if (controller != null)
             {
+
+                Debug.Log("controller == null");
                 args.controllerIndex = controller.controllerIndex;
             }
             args.distance = 0f;
