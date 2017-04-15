@@ -66,7 +66,7 @@ public class SelectorBehavior : MonoBehaviour {
                 currentFocus.GetComponent<LetterBehaviorVR>().OnSelect();
             }
         }
-        if(currentFocus.tag == "Selectable" && Controller.GetHairTriggerDown())
+        if(currentFocus != null && currentFocus.tag == "Selectable" && Controller.GetHairTriggerDown())
         {
             currentFocus.GetComponent<PlayButton>().PlayMessage();
         }
@@ -89,7 +89,6 @@ public class SelectorBehavior : MonoBehaviour {
     }
     private void LaserPointer_PointerOut(object sender, PointerEventArgs e)
     {
-        Debug.Log("out");
         pointerOnButton = false;
 
     }
@@ -99,8 +98,6 @@ public class SelectorBehavior : MonoBehaviour {
         if (e.target.tag == letterTag)
         {
             pointerOnButton = true;
-            Debug.Log("in");
-
         }
 
     }
