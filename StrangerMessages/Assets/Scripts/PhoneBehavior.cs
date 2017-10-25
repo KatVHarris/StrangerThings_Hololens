@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HoloToolkit.Unity;
+using HoloToolkit.Unity.SpatialMapping;
 
 public class PhoneBehavior : MonoBehaviour
 {
