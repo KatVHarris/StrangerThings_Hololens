@@ -1,0 +1,29 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class PhoneBehavior : MonoBehaviour
+{
+    //public GameObject Player;
+    //SimpleTagalong tagAlong;
+
+    //void Start()
+    //{
+    //    tagAlong = this.gameObject.AddComponent<SimpleTagalong>();
+    //    tagAlong.enabled = false;
+    //}
+
+    //// Update is called once per frame
+    //void Update()
+    //{
+    //    if (SpatialMappingManager.Instance.IsObserverRunning())
+    //    {
+    //        tagAlong.enabled = true;
+    //    }
+    //    else
+    //    {
+    //        tagAlong.enabled = false;
+    //    }
+
+    //}
+
+}
