@@ -21,7 +21,7 @@ namespace HoloToolkit.Unity
             public string BusName = "";
         }
 
-        [MenuItem("Mixed Reality Toolkit/UAudioTools/Profiler", false, 200)]
+        [MenuItem("Addons/UAudioTools/Profiler")]
         static void ShowEditor()
         {
             UAudioProfiler profilerWindow = GetWindow<UAudioProfiler>();
@@ -65,17 +65,17 @@ namespace HoloToolkit.Unity
             {
                 ActiveEvent currentEvent = activeEvents[i];
                 ProfilerEvent tempEvent = new ProfilerEvent();
-                tempEvent.EventName = currentEvent.AudioEvent.Name;
+                tempEvent.EventName = currentEvent.audioEvent.name;
                 tempEvent.EmitterName = currentEvent.AudioEmitter.name;
 
                 // The bus might be null, Unity defaults to Editor-hidden master bus.
-                if (currentEvent.AudioEvent.AudioBus == null)
+                if (currentEvent.audioEvent.bus == null)
                 {
                     tempEvent.BusName = "-MasterBus-";
                 }
                 else
                 {
-                    tempEvent.BusName = currentEvent.AudioEvent.AudioBus.name;
+                    tempEvent.BusName = currentEvent.audioEvent.bus.name;
                 }
 
                 currentEvents[i] = tempEvent;
@@ -99,23 +99,18 @@ namespace HoloToolkit.Unity
                 return;
             }
 
-            //Fix null reference exception when launching with profiler is open
-            if(eventTimeline!=null)
+            this.currentFrame = EditorGUILayout.IntSlider(this.currentFrame, 0, this.eventTimeline.Count - 1);
+            scrollOffset = EditorGUILayout.BeginScrollView(scrollOffset);
+
+            if (this.eventTimeline.Count > this.currentFrame)
             {
-                this.currentFrame = EditorGUILayout.IntSlider(this.currentFrame, 0, this.eventTimeline.Count - 1);
-                scrollOffset = EditorGUILayout.BeginScrollView(scrollOffset);
-
-                if (this.eventTimeline.Count > this.currentFrame)
+                for (int i = 0; i < this.eventTimeline[this.currentFrame].Length; i++)
                 {
-                    for (int i = 0; i < this.eventTimeline[this.currentFrame].Length; i++)
-                    {
-                        DrawEventButton(this.eventTimeline[this.currentFrame][i], i);
-                    }
+                    DrawEventButton(this.eventTimeline[this.currentFrame][i], i);
                 }
-
-                EditorGUILayout.EndScrollView();
             }
-           
+
+            EditorGUILayout.EndScrollView();
         }
 
         private void DrawEventButton(ProfilerEvent currentEvent, int id)

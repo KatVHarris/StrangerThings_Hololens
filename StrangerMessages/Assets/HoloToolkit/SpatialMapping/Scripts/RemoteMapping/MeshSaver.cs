@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-#if !UNITY_EDITOR && UNITY_WSA
+#if !UNITY_EDITOR
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Streams;
 #endif
 
-namespace HoloToolkit.Unity.SpatialMapping
+namespace HoloToolkit.Unity
 {
     /// <summary>
     /// MeshSaver is a static class containing methods used for saving and loading meshes.
@@ -31,48 +30,12 @@ namespace HoloToolkit.Unity.SpatialMapping
         {
             get
             {
-#if !UNITY_EDITOR && UNITY_WSA
+#if !UNITY_EDITOR
                 return ApplicationData.Current.RoamingFolder.Path;
 #else
                 return Application.persistentDataPath;
 #endif
             }
-        }
-
-        /// <summary>
-        /// Transforms all the mesh vertices into world position before saving to file.
-        /// </summary>
-        /// <param name="fileName">Name to give the saved mesh file. Exclude path and extension.</param>
-        /// <param name="meshes">The collection of Mesh objects to save.</param>
-        /// <returns>Fully qualified name of the saved mesh file.</returns>
-        /// <remarks>Determines the save path to use and automatically applies the file extension.</remarks>
-        public static string Save(string fileName, IEnumerable<MeshFilter> meshFilters)
-        {
-            if (string.IsNullOrEmpty(fileName))
-            {
-                throw new ArgumentException("Must specify a valid fileName.");
-            }
-
-            if (meshFilters == null)
-            {
-                throw new ArgumentNullException("Value of meshFilters cannot be null.");
-            }
-
-            // Create the mesh file.
-            String folderName = MeshFolderName;
-            Debug.Log(String.Format("Saving mesh file: {0}", Path.Combine(folderName, fileName + fileExtension)));
-
-            using (Stream stream = OpenFileForWrite(folderName, fileName + fileExtension))
-            {
-                // Serialize and write the meshes to the file.
-                byte[] data = SimpleMeshSerializer.Serialize(meshFilters);
-                stream.Write(data, 0, data.Length);
-                stream.Flush();
-            }
-
-            Debug.Log("Mesh file saved.");
-
-            return Path.Combine(folderName, fileName + fileExtension);
         }
 
         /// <summary>
@@ -117,7 +80,7 @@ namespace HoloToolkit.Unity.SpatialMapping
         /// <param name="fileName">Name of the saved mesh file. Exclude path and extension.</param>
         /// <returns>Collection of Mesh objects read from the file.</returns>
         /// <remarks>Determines the path from which to load and automatically applies the file extension.</remarks>
-        public static IList<Mesh> Load(string fileName)
+        public static IEnumerable<Mesh> Load(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
             {
@@ -154,17 +117,16 @@ namespace HoloToolkit.Unity.SpatialMapping
         {
             Stream stream = null;
 
-#if !UNITY_EDITOR && UNITY_WSA
-            Task<Task> task = Task<Task>.Factory.StartNew(
+#if !UNITY_EDITOR
+            Task task = new Task(
                             async () =>
                             {
                                 StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(folderName);
                                 StorageFile file = await folder.GetFileAsync(fileName);
-                                IRandomAccessStreamWithContentType randomAccessStream = await file.OpenReadAsync();
-                                stream = randomAccessStream.AsStreamForRead();
+                                stream = await file.OpenStreamForReadAsync();
                             });
+            task.Start();
             task.Wait();
-            task.Result.Wait();
 #else
             stream = new FileStream(Path.Combine(folderName, fileName), FileMode.Open, FileAccess.Read);
 #endif
@@ -182,17 +144,16 @@ namespace HoloToolkit.Unity.SpatialMapping
         {
             Stream stream = null;
 
-#if !UNITY_EDITOR && UNITY_WSA
-            Task<Task> task = Task<Task>.Factory.StartNew(
+#if !UNITY_EDITOR
+            Task task = new Task(
                             async () =>
                             {
                                 StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(folderName);
                                 StorageFile file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
-                                IRandomAccessStream randomAccessStream = await file.OpenAsync(FileAccessMode.ReadWrite);
-                                stream = randomAccessStream.AsStreamForWrite();
+                                stream = await file.OpenStreamForWriteAsync();
                             });
+            task.Start();
             task.Wait();
-            task.Result.Wait();
 #else
             stream = new FileStream(Path.Combine(folderName, fileName), FileMode.Create, FileAccess.Write);
 #endif

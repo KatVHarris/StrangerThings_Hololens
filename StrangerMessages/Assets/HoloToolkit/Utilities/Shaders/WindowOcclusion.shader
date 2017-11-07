@@ -1,11 +1,10 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See LICENSE in the project root for license information.
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
 ///
 /// Simple occlusion shader that can be used to hide other objects.
 /// This prevents other objects from being rendered by drawing invisible 'opaque' pixels to the depth buffer.
 ///
-Shader "MixedRealityToolkit/WindowOcclusion"
+Shader "HoloToolkit/WindowOcclusion"
 {
     Properties
     {
@@ -35,15 +34,12 @@ Shader "MixedRealityToolkit/WindowOcclusion"
             struct v2f
             {
                 float4 pos : SV_POSITION;
-                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             v2f vert(appdata_base v)
             {
-                UNITY_SETUP_INSTANCE_ID(v);
                 v2f o;
                 o.pos = UnityObjectToClipPos(v.vertex);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 return o;
             }
 

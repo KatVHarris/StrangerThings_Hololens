@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using HoloToolkit.Unity;
-using HoloToolkit.Unity.InputModule;
 
 public class LetterBehavior : MonoBehaviour {
     private GameObject focusedObject;
@@ -23,7 +22,7 @@ public class LetterBehavior : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(Billboard.GetComponent<TapToPlace>().IsBeingPlaced)//|| phone.GetComponent<PlayButton>().playingMessage)
+        if(Billboard.GetComponent<TapToPlace>().placing)//|| phone.GetComponent<PlayButton>().playingMessage)
         {
             selectable = false;
             this.transform.GetComponent<BoxCollider>().enabled = false;
@@ -44,7 +43,7 @@ public class LetterBehavior : MonoBehaviour {
     void OnSelect()
     {
             //Send Message that the Letter was selected
-            if (GazeManager.Instance.HitObject.name == this.gameObject.name)
+            if (GazeManager.Instance.FocusedObject.name == this.gameObject.name)
             {
                 //Add letter to stringMessage
                 PMessageManager.AddLetter(this.name);
@@ -56,8 +55,8 @@ public class LetterBehavior : MonoBehaviour {
 
     void OnGazeEnter()
     {
-        Debug.Log("can select? " + selectable +"is placing: "+ Billboard.GetComponent<TapToPlace>().IsBeingPlaced);
-            if (GazeManager.Instance.HitObject.name == this.gameObject.name)
+        Debug.Log("can select? " + selectable +"is placing: "+ Billboard.GetComponent<TapToPlace>().placing);
+            if (GazeManager.Instance.FocusedObject.name == this.gameObject.name)
             {
                 letterLightlight.SetActive(true);
                 //change light color

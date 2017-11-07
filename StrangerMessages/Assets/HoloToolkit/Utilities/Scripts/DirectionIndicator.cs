@@ -34,9 +34,6 @@ namespace HoloToolkit.Unity
         // Cache the MeshRenderer for the on-cursor indicator since it will be enabled and disabled frequently.
         private Renderer directionIndicatorRenderer;
 
-        // Cache the Material to prevent material leak.
-        private Material indicatorMaterial;
-
         // Check if the cursor direction indicator is visible.
         private bool isDirectionIndicatorVisible;
 
@@ -58,13 +55,13 @@ namespace HoloToolkit.Unity
             if (DirectionIndicatorObject == null)
             {
                 Debug.LogError("Direction Indicator failed to instantiate.");
+                return;
             }
         }
 
         public void OnDestroy()
         {
-            DestroyImmediate(indicatorMaterial);
-            Destroy(DirectionIndicatorObject);
+            GameObject.Destroy(DirectionIndicatorObject);
         }
 
         private GameObject InstantiateDirectionIndicator(GameObject directionIndicator)
@@ -84,9 +81,9 @@ namespace HoloToolkit.Unity
             directionIndicatorRenderer.enabled = false;
 
             // Remove any colliders and rigidbodies so the indicators do not interfere with Unity's physics system.
-            foreach (Collider indicatorCollider in indicator.GetComponents<Collider>())
+            foreach (Collider collider in indicator.GetComponents<Collider>())
             {
-                Destroy(indicatorCollider);
+                Destroy(collider);
             }
 
             foreach (Rigidbody rigidBody in indicator.GetComponents<Rigidbody>())
@@ -94,7 +91,7 @@ namespace HoloToolkit.Unity
                 Destroy(rigidBody);
             }
 
-            indicatorMaterial = directionIndicatorRenderer.material;
+            Material indicatorMaterial = directionIndicatorRenderer.material;
             indicatorMaterial.color = DirectionIndicatorColor;
             indicatorMaterial.SetColor("_TintColor", DirectionIndicatorColor);
 
@@ -107,13 +104,13 @@ namespace HoloToolkit.Unity
             {
                 return;
             }
-            Camera mainCamera = CameraCache.Main;
+
             // Direction from the Main Camera to this script's parent gameObject.
-            Vector3 camToObjectDirection = gameObject.transform.position - mainCamera.transform.position;
+            Vector3 camToObjectDirection = gameObject.transform.position - Camera.main.transform.position;
             camToObjectDirection.Normalize();
 
             // The cursor indicator should only be visible if the target is not visible.
-            isDirectionIndicatorVisible = !IsTargetVisible(mainCamera);
+            isDirectionIndicatorVisible = !IsTargetVisible();
             directionIndicatorRenderer.enabled = isDirectionIndicatorVisible;
 
             if (isDirectionIndicatorVisible)
@@ -122,7 +119,6 @@ namespace HoloToolkit.Unity
                 Quaternion rotation;
                 GetDirectionIndicatorPositionAndRotation(
                     camToObjectDirection,
-                    mainCamera.transform,
                     out position,
                     out rotation);
 
@@ -131,36 +127,42 @@ namespace HoloToolkit.Unity
             }
         }
 
-        private bool IsTargetVisible(Camera mainCamera)
+        private bool IsTargetVisible()
         {
             // This will return true if the target's mesh is within the Main Camera's view frustums.
-            Vector3 targetViewportPosition = mainCamera.WorldToViewportPoint(gameObject.transform.position);
+            Vector3 targetViewportPosition = Camera.main.WorldToViewportPoint(gameObject.transform.position);
             return (targetViewportPosition.x > VisibilitySafeFactor && targetViewportPosition.x < 1 - VisibilitySafeFactor &&
-                    targetViewportPosition.y > VisibilitySafeFactor && targetViewportPosition.y < 1 - VisibilitySafeFactor &&
-                    targetViewportPosition.z > 0);
+                targetViewportPosition.y > VisibilitySafeFactor && targetViewportPosition.y < 1 - VisibilitySafeFactor &&
+                targetViewportPosition.z > 0);
         }
 
-        private void GetDirectionIndicatorPositionAndRotation(Vector3 camToObjectDirection, Transform cameraTransform, out Vector3 position, out Quaternion rotation)
+        private void GetDirectionIndicatorPositionAndRotation(
+            Vector3 camToObjectDirection,
+            out Vector3 position,
+            out Quaternion rotation)
         {
             // Find position:
             // Save the cursor transform position in a variable.
             Vector3 origin = Cursor.transform.position;
+
             // Project the camera to target direction onto the screen plane.
-            Vector3 cursorIndicatorDirection = Vector3.ProjectOnPlane(camToObjectDirection, -1 * cameraTransform.forward);
+            Vector3 cursorIndicatorDirection = Vector3.ProjectOnPlane(camToObjectDirection, -1 * Camera.main.transform.forward);
             cursorIndicatorDirection.Normalize();
 
             // If the direction is 0, set the direction to the right.
             // This will only happen if the camera is facing directly away from the target.
             if (cursorIndicatorDirection == Vector3.zero)
             {
-                cursorIndicatorDirection = cameraTransform.right;
+                cursorIndicatorDirection = Camera.main.transform.right;
             }
 
             // The final position is translated from the center of the screen along this direction vector.
             position = origin + cursorIndicatorDirection * MetersFromCursor;
 
             // Find the rotation from the facing direction to the target object.
-            rotation = Quaternion.LookRotation(cameraTransform.forward, cursorIndicatorDirection) * directionIndicatorDefaultRotation;
+            rotation = Quaternion.LookRotation(
+                Camera.main.transform.forward,
+                cursorIndicatorDirection) * directionIndicatorDefaultRotation;
         }
     }
 }
